@@ -1,7 +1,9 @@
 p1/lib/
 p1/.vscode/
-p1/p1oy/target/
-p1/p1oy/src/out/
-p1/p1oy/src/maven/
-p1/p1oy/HikariCP-6.3.0.jar
-p1/~$p1.docx
+p1/target/
+p1/src/out/
+p1/src/maven/
+p1/HikariCP-6.3.0.jar
+p1/p1oy/~$p1.docx
+p1/mysql-connector-java-8.0.28.jar
+

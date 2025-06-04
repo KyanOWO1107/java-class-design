@@ -7,23 +7,23 @@ import javax.swing.table.TableModel;
 
 public class DBUtil {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/hrms_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
-    private static final String USER = "root";
-    private static final String PASSWORD = "kyanite7";
+    // 修改数据库连接配置（for sqlite）
+    private static final String URL = "jdbc:sqlite:e:/hrms.db";
+    // 删除USER和PASSWORD字段
+    // Remove these lines
+    // private static final String USER = "root";
+    // private static final String PASSWORD = "kyanite7";
 
-    
-    
     static {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "MySQL驱动加载失败", "错误", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "SQLite驱动加载失败", "错误", JOptionPane.ERROR_MESSAGE);
         }
     }
     
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        return DriverManager.getConnection(URL);
     }
     
     public static void close(Connection conn, Statement stmt, ResultSet rs) {
@@ -83,12 +83,12 @@ public class DBUtil {
     }
 
     public static void initDatabase() {
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(URL); // Remove USER/PASSWORD parameters
              Statement stmt = conn.createStatement()) {
             
             // 添加操作日志表
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS operation_log ("
-                + "log_id INT AUTO_INCREMENT PRIMARY KEY,"
+                + "log_id INTEGER PRIMARY KEY AUTOINCREMENT,"  // 修改AUTO_INCREMENT为AUTOINCREMENT
                 + "emp_id VARCHAR(20),"
                 + "operation_type VARCHAR(50),"
                 + "operation_date DATETIME DEFAULT CURRENT_TIMESTAMP,"
