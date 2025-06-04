@@ -40,67 +40,52 @@ public class DepartmentManagementPanel extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.add(saveButton);
         buttonPanel.add(deleteButton);
-        
-        add(buttonPanel, BorderLayout.SOUTH);
-// 由于原代码提示语法错误，推测此处缺少方法体内容，暂时添加空注释表示可能需要补充逻辑
-// 若此处是构造方法结束，可直接保留大括号
-    
-
-        // 从数据库加载部门层级结构
-try (Connection conn = DBUtil.getConnection();
-     Statement stmt = conn.createStatement();
-     // 修改数据库查询语句获取层级关系
-     ResultSet rs = stmt.executeQuery(
-         "WITH RECURSIVE DeptTree AS (" +
-         "SELECT dept_id, dept_name, parent_dept_id FROM department WHERE parent_dept_id IS NULL " +
-         "UNION ALL " +
-         "SELECT d.dept_id, d.dept_name, d.parent_dept_id FROM department d " +
-         "INNER JOIN DeptTree dt ON d.parent_dept_id = dt.dept_id) " +
-         "SELECT * FROM DeptTree")) {
-    // 创建树模型
-    DefaultMutableTreeNode root = new DefaultMutableTreeNode("所有部门");
-            while (rs.next()) {
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(
-                    rs.getString("dept_name") + " (" + rs.getString("dept_id") + ")");
-                root.add(node);
-            }
-            
-            JTree tree = new JTree(root);
-            add(new JScrollPane(tree), BorderLayout.WEST);
-            
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+        JButton refreshButton = new JButton("刷新部门树");
+        buttonPanel.add(refreshButton);
+        refreshButton.addActionListener(e -> refreshDepartmentTree());
     }
     
     private void saveDepartment() {
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(
+        try (Connection conn = DBUtil.getConnection()) {
+            DBUtil.beginTransaction(conn);
+            try (PreparedStatement pstmt = conn.prepareStatement(
                  "INSERT INTO department (dept_id, dept_name, parent_dept_id) VALUES (?, ?, ?)")) {
-            
-            // 处理空值逻辑保持不变
-            pstmt.setString(3, parentDeptField.getText().isEmpty() ? null : parentDeptField.getText());
-            
-            pstmt.setString(1, deptIdField.getText());
-            pstmt.setString(2, deptNameField.getText());
-            pstmt.setString(3, parentDeptField.getText().isEmpty() ? null : parentDeptField.getText());
-            
-            pstmt.executeUpdate();
-            JOptionPane.showMessageDialog(this, "部门保存成功");
-            // 修改此处调用正确的刷新方法
-            refreshDepartmentTree(); 
-            
+                
+                pstmt.setString(1, deptIdField.getText());
+                pstmt.setString(2, deptNameField.getText());
+                pstmt.setString(3, parentDeptField.getText().isEmpty() ? null : parentDeptField.getText());
+                pstmt.executeUpdate();
+                
+                refreshDepartmentTree();
+                String newDeptInfo = deptIdField.getText() + " - " + deptNameField.getText();
+                DBUtil.logOperation("部门新增", deptIdField.getText(), null, newDeptInfo);
+                
+                DBUtil.commitTransaction(conn);
+                JOptionPane.showMessageDialog(this, "部门保存成功");
+                
+            } catch (SQLException ex) {
+                DBUtil.rollbackTransaction(conn);
+                throw ex; // Re-throw to outer catch
+            }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "保存失败: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "操作失败: " + ex.getMessage());
         }
     }
+
 
     // 新增部门树刷新方法
     private void refreshDepartmentTree() {
         deptTree.setModel(createDeptTreeModel());
-        deptTree.updateUI();
+        ((DefaultTreeModel)deptTree.getModel()).reload();
+        expandAllNodes(deptTree);
     }
 
+    private void expandAllNodes(JTree tree) {
+        for (int i = 0; i < tree.getRowCount(); i++) {
+            tree.expandRow(i);
+        }
+    }
+    
     // 修改部门树创建方法
     private DefaultTreeModel createDeptTreeModel() {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("所有部门");

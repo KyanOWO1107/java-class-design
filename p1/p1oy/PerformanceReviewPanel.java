@@ -2,6 +2,7 @@ import java.awt.GridLayout;
 import java.sql.*;
 
 import javax.swing.*;
+import javax.swing.table.TableModel;
 
 public class PerformanceReviewPanel extends JPanel {
     private JComboBox<String> employeeCombo;
@@ -9,6 +10,7 @@ public class PerformanceReviewPanel extends JPanel {
     private JTextArea reviewContentArea;
     private JComboBox<String> reviewTypeCombo;
     private JTextField scoreField;
+    private JTable historyTable;
     
     public PerformanceReviewPanel() {
         setLayout(new GridLayout(0, 2, 10, 10));
@@ -33,6 +35,12 @@ public class PerformanceReviewPanel extends JPanel {
         add(new JLabel());
         add(saveButton);
         
+        // Add history table below the form
+        historyTable = new JTable();
+        add(new JScrollPane(historyTable), "span, grow, wrap");
+        
+        // Add selection listener to update history
+        employeeCombo.addActionListener(e -> updateHistory());
     }
     
     private void loadEmployees() {
@@ -73,6 +81,30 @@ public class PerformanceReviewPanel extends JPanel {
             }
         } catch (SQLException | IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(this, "保存失败: " + ex.getMessage());
+        }
+    }
+    
+    private void updateHistory() {
+        String selected = (String) employeeCombo.getSelectedItem();
+        if (selected != null) {
+            String empId = selected.substring(selected.indexOf("(")+1, selected.indexOf(")"));
+            try {
+                historyTable.setModel(createHistoryTable(empId));
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "加载历史记录失败: " + ex.getMessage());
+            }
+        }
+    }
+    
+    // Modified method to handle exceptions properly
+    private TableModel createHistoryTable(String empId) throws SQLException {
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(
+                 "SELECT review_date, review_type, score, content FROM performance_reviews WHERE emp_id = ?")) {
+            
+            pstmt.setString(1, empId);
+            ResultSet rs = pstmt.executeQuery();
+            return DBUtil.resultSetToTableModel(rs);
         }
     }
 }

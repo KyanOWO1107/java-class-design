@@ -5,7 +5,10 @@ import java.sql.*;
 public class SearchEmployeePanel extends JPanel {
     private JTextField searchField;
     private JTable resultTable;
-    
+    private JButton nextButton, prevButton;
+    private int currentPage = 1;
+    private static final int PAGE_SIZE = 50;
+
     public SearchEmployeePanel() {
         setLayout(new BorderLayout());
         
@@ -26,18 +29,38 @@ public class SearchEmployeePanel extends JPanel {
         
         add(searchPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
+    
+        JPanel pagePanel = new JPanel();
+        prevButton = new JButton("上一页");
+        nextButton = new JButton("下一页");
+        pagePanel.add(prevButton);
+        pagePanel.add(nextButton);
+        
+        add(pagePanel, BorderLayout.SOUTH);
+        
+        prevButton.addActionListener(e -> {
+            currentPage = Math.max(1, currentPage - 1);
+            searchEmployees();
+        });
+        nextButton.addActionListener(e -> {
+            currentPage++;
+            searchEmployees();
+        });
     }
     
     private void searchEmployees() {
+        String sql = "SELECT e.*, d.dept_name FROM employee_info e " +
+                     "LEFT JOIN department d ON e.department_id = d.dept_id " +
+                     "WHERE e.emp_id LIKE ? OR e.name LIKE ? " +
+                     "LIMIT ? OFFSET ?";
+                     
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(
-                 "SELECT e.*, d.dept_name FROM employee_info e " +
-                 "LEFT JOIN department d ON e.department_id = d.dept_id " +
-                 "WHERE e.emp_id LIKE ? OR e.name LIKE ?")) {
-            
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             String keyword = "%" + searchField.getText() + "%";
             pstmt.setString(1, keyword);
             pstmt.setString(2, keyword);
+            pstmt.setInt(3, PAGE_SIZE);
+            pstmt.setInt(4, (currentPage - 1) * PAGE_SIZE);
             
             ResultSet rs = pstmt.executeQuery();
 // 由于 DBUtil 中未定义 resultSetToTableModel 方法，我们需要手动实现将 ResultSet 转换为 TableModel

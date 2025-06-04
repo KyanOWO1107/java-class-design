@@ -126,21 +126,29 @@ public class MainFrame extends JFrame {
         contentPanel.repaint();
     }
     
-    private JTree createNavigationTree() {  // Changed return type from void to JTree
+    private JTree createNavigationTree() {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("人事管理系统");
         
+        // 基本信息管理
         DefaultMutableTreeNode baseInfo = new DefaultMutableTreeNode("基本信息管理");
         baseInfo.add(new DefaultMutableTreeNode("新增员工"));
         baseInfo.add(new DefaultMutableTreeNode("编辑员工"));
         baseInfo.add(new DefaultMutableTreeNode("删除员工"));
+        baseInfo.add(new DefaultMutableTreeNode("查询员工"));  // 新增查询节点
+        baseInfo.add(new DefaultMutableTreeNode("部门管理"));  // 新增部门管理节点
         
         DefaultMutableTreeNode transfer = new DefaultMutableTreeNode("人员调动");
         transfer.add(new DefaultMutableTreeNode("调动记录"));
         
+        // 薪资管理
+        DefaultMutableTreeNode salaryNode = new DefaultMutableTreeNode("薪资管理");
+        salaryNode.add(new DefaultMutableTreeNode("薪资调整"));
+        salaryNode.add(new DefaultMutableTreeNode("薪资历史"));  // 新增历史查询
+        
         root.add(baseInfo);
         root.add(new DefaultMutableTreeNode("考核管理"));
         root.add(transfer);
-        root.add(new DefaultMutableTreeNode("薪资管理"));
+        root.add(salaryNode);  // 修正节点名称
         
         JTree tree = new JTree(root);
         tree.addTreeSelectionListener(e -> {

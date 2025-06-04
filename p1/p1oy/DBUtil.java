@@ -3,12 +3,13 @@ import java.util.Vector;
 
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 public class DBUtil {
 
     private static final String URL = "jdbc:mysql://localhost:3306/hrms_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
     private static final String USER = "root";
-    private static final String PASSWORD = "password";
+    private static final String PASSWORD = "kyanite7";
 
     
     
@@ -45,17 +46,16 @@ public class DBUtil {
         }
     }
 
-    public static DefaultTableModel resultSetToTableModel(ResultSet rs) throws SQLException {
+    public static TableModel resultSetToTableModel(ResultSet rs) throws SQLException {
         ResultSetMetaData metaData = rs.getMetaData();
         int columnCount = metaData.getColumnCount();
-
+        
         Vector<String> columnNames = new Vector<>();
-        Vector<Vector<Object>> data = new Vector<>();
-
         for (int i = 1; i <= columnCount; i++) {
             columnNames.add(metaData.getColumnName(i));
         }
-
+        
+        Vector<Vector<Object>> data = new Vector<>();
         while (rs.next()) {
             Vector<Object> row = new Vector<>();
             for (int i = 1; i <= columnCount; i++) {
@@ -63,7 +63,7 @@ public class DBUtil {
             }
             data.add(row);
         }
-
+        
         return new DefaultTableModel(data, columnNames);
     }
 
@@ -79,6 +79,49 @@ public class DBUtil {
             pstmt.executeUpdate();
         } catch (SQLException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    public static void initDatabase() {
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             Statement stmt = conn.createStatement()) {
+            
+            // 添加操作日志表
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS operation_log ("
+                + "log_id INT AUTO_INCREMENT PRIMARY KEY,"
+                + "emp_id VARCHAR(20),"
+                + "operation_type VARCHAR(50),"
+                + "operation_date DATETIME DEFAULT CURRENT_TIMESTAMP,"
+                + "details TEXT)");
+                
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void beginTransaction(Connection conn) {
+        try {
+            conn.setAutoCommit(false);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to start transaction", e);
+        }
+    }
+
+    public static void commitTransaction(Connection conn) {
+        try {
+            conn.commit();
+            conn.setAutoCommit(true);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to commit transaction", e);
+        }
+    }
+
+    public static void rollbackTransaction(Connection conn) {
+        try {
+            conn.rollback();
+            conn.setAutoCommit(true);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to rollback transaction", e);
         }
     }
 }
