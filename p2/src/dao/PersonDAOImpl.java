@@ -80,4 +80,32 @@ public class PersonDAOImpl implements PersonDAO {
         }
         return result;
     }
+
+    @Override
+    public List<Object[]> searchPersons(String keyword) throws SQLException {
+        List<Object[]> results = new ArrayList<>();
+        String sql = "SELECT staff_id, name, department, position, phone FROM staff WHERE name LIKE ? OR staff_id LIKE ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            String searchPattern = "%" + keyword + "%";
+            ps.setString(1, searchPattern);
+            ps.setString(2, searchPattern);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Object[] row = {
+                        rs.getString("staff_id"),
+                        rs.getString("name"),
+                        rs.getString("department"),
+                        rs.getString("position"),
+                        rs.getString("phone")
+                    };
+                    results.add(row);
+                }
+            }
+        }
+        return results;
+    }
 }

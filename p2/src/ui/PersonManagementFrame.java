@@ -67,6 +67,30 @@ private void initComponents() {
     buttonPanel.add(delBtn);
     add(buttonPanel, BorderLayout.SOUTH);
     
+    // 添加人员查询面板
+    JPanel searchPanel = new JPanel();
+    JTextField searchField = new JTextField(20);
+    JButton searchBtn = new JButton("搜索");
+    
+    searchBtn.addActionListener(e -> {
+        String keyword = searchField.getText();
+        try {
+            List<Object[]> results = new PersonDAOImpl().searchPersons(keyword);
+            ((PersonTableModel)personTable.getModel()).setData(results);
+            personTable.updateUI();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,
+                "搜索失败: " + ex.getMessage(),
+                "错误",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    });
+    
+    searchPanel.add(new JLabel("姓名/工号:"));
+    searchPanel.add(searchField);
+    searchPanel.add(searchBtn);
+    add(searchPanel, BorderLayout.NORTH);
+    
     refreshTableData();
 }
 
@@ -142,5 +166,15 @@ class PersonTableModel extends AbstractTableModel {
     @Override public int getRowCount() { return data.size(); }
     @Override public int getColumnCount() { return columnNames.length; }
     @Override public Object getValueAt(int row, int col) { return data.get(row)[col]; }
-    @Override public String getColumnName(int column) { return columnNames[column]; }
+    @Override
+    public String getColumnName(int column) { return columnNames[column]; }
+
+// ▼▼▼ Remove this residual method declaration ▼▼▼
+// 在PersonDAOImpl中添加搜索方法
+// public List<Object[]> searchPersons(String keyword) throws SQLException {
+//     String sql = "SELECT * FROM staff WHERE name LIKE ? OR staff_id LIKE ?";
+//     List<Object[]> results = new ArrayList<>();
+//     // ... 实现搜索逻辑 ...
+// }
+// ▲▲▲ Remove up to here ▲▲▲
 }

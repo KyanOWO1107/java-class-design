@@ -49,14 +49,16 @@ public class AssetManagementFrame extends JInternalFrame {
         buttonPanel.add(delBtn);
         add(buttonPanel, BorderLayout.SOUTH);
         // 添加查询面板
+        JPanel searchPanel = new JPanel();
         JTextField searchField = new JTextField(20);
         JButton searchBtn = new JButton("搜索");
-        // In the search button action listener:
+        
         searchBtn.addActionListener(e -> {
             String keyword = searchField.getText();
             try {
                 List<Asset> results = assetDAO.searchAssets(keyword);
                 model.setData(results);
+                assetTable.updateUI();
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(AssetManagementFrame.this,
                     "搜索失败: " + ex.getMessage(),
@@ -64,13 +66,18 @@ public class AssetManagementFrame extends JInternalFrame {
                     JOptionPane.ERROR_MESSAGE);
             }
         });
+        
+        searchPanel.add(new JLabel("关键字搜索:"));
+        searchPanel.add(searchField);
+        searchPanel.add(searchBtn);
+        add(searchPanel, BorderLayout.NORTH);  // 添加至顶部区域
     }
         
         // In refreshTableData():
         private void refreshTableData() {
             try {
                 AssetTableModel model = (AssetTableModel) assetTable.getModel();
-                model.setData(assetDAO.getAllAssets()); // Use existing DAO instance
+                model.setData(assetDAO.getAllAssets());
                 assetTable.updateUI();
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this,
@@ -79,6 +86,16 @@ public class AssetManagementFrame extends JInternalFrame {
                     JOptionPane.ERROR_MESSAGE);
             }
         }
+
+        // Remove unused method
+        // private void searchAssets(String keyword) {
+        //     try {
+        //         List<Asset> results = assetDAO.searchAssets(keyword);
+        //         // 更新表格模型
+        //     } catch (SQLException e) {
+        //         JOptionPane.showMessageDialog(this, "搜索失败: " + e.getMessage());
+        //     }
+        // }
         
         
         

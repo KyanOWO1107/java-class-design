@@ -10,4 +10,7 @@ public interface PersonDAO {
     
     // 新增添加方法
     void add(String staffId, String name, String department, String position, String phone) throws SQLException;
+    
+    // Add this new method declaration
+    List<Object[]> searchPersons(String keyword) throws SQLException;
 }

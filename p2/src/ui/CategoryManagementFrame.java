@@ -2,7 +2,8 @@ package ui;
 
 import javax.swing.*;
 
-import dao.CategoryDAO;
+// import dao.CategoryDAO;
+import dao.CategoryDAOImpl;
 
 import java.awt.*;
 import java.sql.SQLException;
@@ -11,6 +12,7 @@ import java.awt.event.ActionListener;
 
 public class CategoryManagementFrame extends JInternalFrame {
     private JTable categoryTable;
+    private JList<String> categoryList; // Add this declaration
     
     public CategoryManagementFrame() {
         super("资产分类管理", true, true, true, true);
@@ -38,6 +40,34 @@ buttonPanel.add(createButton("新增", (ActionListener) e -> addCategory()));
         buttonPanel.add(createButton("修改", e -> editCategory())); 
         buttonPanel.add(createButton("删除", e -> deleteCategory()));
         add(buttonPanel, BorderLayout.SOUTH);
+        
+        // 添加分类查询面板
+        JPanel searchPanel = new JPanel();
+        JTextField searchField = new JTextField(15);
+        JButton searchBtn = new JButton("搜索");
+        
+        // Replace the test data setup with actual list initialization
+        categoryList = new JList<>();
+        JScrollPane listScrollPane = new JScrollPane(categoryList);
+        add(listScrollPane, BorderLayout.WEST);
+        
+        searchBtn.addActionListener(e -> {
+            String keyword = searchField.getText();
+            try {
+                java.util.List<String> results = new CategoryDAOImpl().searchCategories(keyword);
+                categoryList.setListData(results.toArray(new String[0])); // This line will now work
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this,
+                    "搜索失败: " + ex.getMessage(),
+                    "错误",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        
+        searchPanel.add(new JLabel("分类名称:"));
+        searchPanel.add(searchField);
+        searchPanel.add(searchBtn);
+        add(searchPanel, BorderLayout.NORTH);
     }
 
     private JButton createButton(String text, ActionListener action) {
@@ -50,7 +80,8 @@ buttonPanel.add(createButton("新增", (ActionListener) e -> addCategory()));
         String categoryName = JOptionPane.showInputDialog(this, "请输入分类名称：");
         if (categoryName != null && !categoryName.trim().isEmpty()) {
             try {
-                new CategoryDAO().addCategory(categoryName);
+                // Replace with implementation class
+                new CategoryDAOImpl().addCategory(categoryName);
                 // 替换为数据库查询
                 refreshTableData();
                 JOptionPane.showMessageDialog(this, "分类添加成功");
@@ -75,7 +106,8 @@ buttonPanel.add(createButton("新增", (ActionListener) e -> addCategory()));
         
         if (newName != null && !newName.trim().isEmpty() && !newName.equals(oldName)) {
             try {
-                new CategoryDAO().updateCategory(oldName, newName);  // 需要DAO实现update方法
+                // Replace with implementation class
+                new CategoryDAOImpl().updateCategory(oldName, newName);
                 refreshTableData();
                 JOptionPane.showMessageDialog(this, "分类修改成功");
             } catch (SQLException ex) {
@@ -97,7 +129,8 @@ buttonPanel.add(createButton("新增", (ActionListener) e -> addCategory()));
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 String categoryName = (String) categoryTable.getValueAt(selectedRow, 1);
-                new CategoryDAO().deleteCategory(categoryName);  // 需要DAO实现delete方法
+                // Replace with implementation class
+                new CategoryDAOImpl().deleteCategory(categoryName);
                 refreshTableData();
                 JOptionPane.showMessageDialog(this, "分类删除成功");
             } catch (SQLException ex) {
@@ -109,7 +142,8 @@ buttonPanel.add(createButton("新增", (ActionListener) e -> addCategory()));
     // 新增辅助方法
     private void refreshTableData() throws SQLException {
         CategoryTableModel model = (CategoryTableModel) categoryTable.getModel();
-        model.setData(new CategoryDAO().getAllCategoriesWithID());  // 需要DAO实现获取带ID的数据
+        // Replace with implementation class
+        model.setData(new CategoryDAOImpl().getAllCategoriesWithID());
         categoryTable.updateUI();
     }
 
@@ -119,4 +153,11 @@ buttonPanel.add(createButton("新增", (ActionListener) e -> addCategory()));
             "操作失败", 
             JOptionPane.ERROR_MESSAGE);
     }
+
+// ▼▼▼ 删除以下残留方法 ▼▼▼
+// public List<String> searchCategories(String keyword) throws SQLException {
+//     String sql = "SELECT category_name FROM asset_categories WHERE category_name LIKE ?";
+//     // ... 实现搜索逻辑 ...
+// }
+// ▲▲▲ 删除到此处 ▲▲▲
 }
