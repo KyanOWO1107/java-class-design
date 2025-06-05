@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import dao.PersonDAOImpl;
+import entity.Person;
 
 // 需创建人员管理窗口框架
 public class PersonManagementFrame extends JInternalFrame {
@@ -16,13 +17,14 @@ public class PersonManagementFrame extends JInternalFrame {
         dialog.setVisible(true);
         if (dialog.isSaved()) {
             try {
-                new PersonDAOImpl().add(
-                    dialog.getStaffId(),
-                    dialog.getName(),
-                    dialog.getDepartment(),
-                    dialog.getPosition(),
-                    dialog.getPhone()
-                );
+                Person person = new Person();
+                person.setStaffId(dialog.getStaffId());
+                person.setName(dialog.getName());
+                person.setDepartment(dialog.getDepartment());
+                person.setPosition(dialog.getPosition());
+                person.setPhone(dialog.getPhone());
+                
+                new PersonDAOImpl().add(person);
                 refreshTableData();
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this,

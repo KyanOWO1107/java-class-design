@@ -1,44 +1,41 @@
-CREATE DATABASE IF NOT EXISTS asset_db;
-
-USE asset_db;
-
--- 资产信息表
+-- 移除CREATE DATABASE语句
+-- 创建资产类别表
 CREATE TABLE IF NOT EXISTS asset_categories (
-    category_id INT AUTO_INCREMENT PRIMARY KEY,
-    category_name VARCHAR(50) NOT NULL UNIQUE
+    category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    category_name TEXT NOT NULL UNIQUE
 );
 
+-- 创建资产表
 CREATE TABLE IF NOT EXISTS assets (
-    asset_id VARCHAR(20) PRIMARY KEY,
-    asset_name VARCHAR(100) NOT NULL,
-    category VARCHAR(50) NOT NULL,
-    model VARCHAR(30),
-    price DECIMAL(10,2),
-    purchase_date DATE,
-    status INT DEFAULT 0,
+    asset_id TEXT PRIMARY KEY,
+    asset_name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    model TEXT,
+    price REAL,
+    purchase_date TEXT,  -- SQLite使用TEXT存储日期
+    status INTEGER DEFAULT 0,
     remark TEXT
 );
 
--- 人员信息表
-CREATE TABLE staff (
-    staff_id VARCHAR(10) PRIMARY KEY,
-    name VARCHAR(20) NOT NULL,
-    gender ENUM('男','女'),
-    department VARCHAR(30),
-    position VARCHAR(30),
+-- 创建人员表
+CREATE TABLE IF NOT EXISTS staff (
+    staff_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    gender TEXT,
+    department TEXT,
+    position TEXT,
     other_info TEXT
 );
 
--- 资产操作流水表
+-- 创建资产操作表
 CREATE TABLE IF NOT EXISTS asset_operations (
-    operation_id INT PRIMARY KEY AUTO_INCREMENT,
-    operation_type ENUM('BORROW', 'RETURN', 'SCRAP') NOT NULL,
-    asset_id VARCHAR(20) NOT NULL,
-    operator VARCHAR(20),
-    operate_time DATETIME NOT NULL,
-    purpose VARCHAR(255),
-    remark TEXT,
-    FOREIGN KEY (asset_id) REFERENCES assets(asset_id)
+    operation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    operation_type TEXT NOT NULL,
+    asset_id TEXT NOT NULL,
+    operator TEXT,
+    operate_time TEXT NOT NULL,
+    purpose TEXT,
+    remark TEXT
 );
 
 -- 补充人员表性别字段

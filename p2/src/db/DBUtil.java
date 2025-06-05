@@ -3,20 +3,18 @@ package db;
 import java.sql.*;
 
 public class DBUtil {
-    // 确认以下配置与本地MySQL一致
-    private static final String URL = "jdbc:mysql://localhost:3306/asset_db?useSSL=false";
-    private static final String USER = "root";
-    private static final String PASSWORD = "123456"; 
-
+    // 修改为SQLite连接配置
+    private static final String URL = "jdbc:sqlite:asset_db.db";
     static {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Class.forName("org.sqlite.JDBC"); // 已正确配置驱动类
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        // SQLite不需要用户名和密码
+        return DriverManager.getConnection(URL);
     }
 }

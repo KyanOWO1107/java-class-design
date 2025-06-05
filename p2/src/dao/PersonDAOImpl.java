@@ -5,29 +5,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 import db.DBUtil;
+import entity.Person;
 
 public class PersonDAOImpl implements PersonDAO {
-    @Override
-    public void add(String staffId, String name, String dept, String position, String phone) throws SQLException {
+    // Remove @Override annotation from this method since it's not in the interface
+    public void add(Person person) throws SQLException {
         String sql = "INSERT INTO staff (staff_id, name, department, position, phone) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, staffId);
-            stmt.setString(2, name);
-            stmt.setString(3, dept);
-            stmt.setString(4, position);
-            stmt.setString(5, phone);
-            stmt.executeUpdate();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, person.getStaffId());
+            ps.setString(2, person.getName());
+            ps.setString(3, person.getDepartment());
+            ps.setString(4, person.getPosition());
+            ps.setString(5, person.getPhone());
+            ps.executeUpdate();
         }
     }
 
     @Override
-    public void delete(String staffId) throws SQLException {
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement("DELETE FROM staff WHERE staff_id = ?")) {
-            stmt.setString(1, staffId);
-            stmt.executeUpdate();
-        }
+    public void add(String staffId, String name, String department, String position, String phone) throws SQLException {
+        Person person = new Person();
+        person.setStaffId(staffId);
+        person.setName(name);
+        person.setDepartment(department);
+        person.setPosition(position);
+        person.setPhone(phone);
+        add(person); // Reuse the existing add(Person) method
     }
 
     @Override
@@ -42,6 +45,16 @@ public class PersonDAOImpl implements PersonDAO {
             stmt.setString(4, phone);
             stmt.setString(5, staffId);
             stmt.executeUpdate();
+        }
+    }
+
+    @Override
+    public void delete(String staffId) throws SQLException {
+        String sql = "DELETE FROM staff WHERE staff_id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, staffId);
+            ps.executeUpdate();
         }
     }
 
