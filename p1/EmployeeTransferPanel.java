@@ -73,6 +73,14 @@ public class EmployeeTransferPanel extends JPanel {
             String deptInfo = (String) departmentCombo.getSelectedItem();
             String newDeptId = deptInfo.substring(deptInfo.indexOf("(")+1, deptInfo.indexOf(")"));
             
+            // 添加日期格式验证
+            try {
+                Date.valueOf(transferDateField.getText());
+            } catch (IllegalArgumentException e) {
+                JOptionPane.showMessageDialog(this, "日期格式应为yyyy-MM-dd");
+                return;
+            }
+            
             // 更新部门
             pstmt.setString(1, newDeptId);
             pstmt.setString(2, empId);

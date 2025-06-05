@@ -64,6 +64,16 @@ public class DeleteEmployeePanel extends JPanel {
         try (Connection conn = DBUtil.getConnection()) {
             conn.setAutoCommit(false);
             
+            // 删除员工前应检查关联数据
+            try (PreparedStatement checkStmt = conn.prepareStatement(
+                "SELECT COUNT(*) FROM attendance WHERE emp_id = ?")) {
+                checkStmt.setString(1, empId);
+                ResultSet rs = checkStmt.executeQuery();
+                if (rs.getInt(1) > 0) {
+                    JOptionPane.showMessageDialog(this, "请先删除该员工的考勤记录");
+                    return;
+                }
+            }
             // 删除员工主记录
             try (PreparedStatement pstmt = conn.prepareStatement(
                 "DELETE FROM employee_info WHERE emp_id = ?")) {

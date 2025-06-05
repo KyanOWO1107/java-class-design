@@ -6,6 +6,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -72,7 +73,18 @@ public class SalaryManagementPanel extends JPanel {
     }
     
     private void loadEmployees() {
-        // 加载员工列表逻辑...
+        // 需要实现完整的员工加载逻辑（当前仅为注释）
+        try (Connection conn = DBUtil.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT emp_id, name FROM employee_info")) {
+        
+            employeeCombo.removeAllItems();
+            while (rs.next()) {
+                employeeCombo.addItem(rs.getString("name") + " (" + rs.getString("emp_id") + ")");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "加载员工数据失败: " + ex.getMessage());
+        }
     }
     
     private void saveSalaryAdjustment() {

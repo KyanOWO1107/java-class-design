@@ -43,6 +43,8 @@ public class DepartmentManagementPanel extends JPanel {
         JButton refreshButton = new JButton("刷新部门树");
         buttonPanel.add(refreshButton);
         refreshButton.addActionListener(e -> refreshDepartmentTree());
+        // 在构造函数末尾添加（当前按钮面板未添加到主布局）
+        add(buttonPanel, BorderLayout.SOUTH);
     }
     
     private void saveDepartment() {

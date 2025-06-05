@@ -56,10 +56,9 @@ public class AddEmployeePanel extends JPanel {
     
     private void loadDepartments() {
         // 从数据库加载部门数据
-        try {
-            Connection conn = DBUtil.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT dept_id, dept_name FROM department");
+        try (Connection conn = DBUtil.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT dept_id, dept_name FROM department")) {
             
             deptComboBox.removeAllItems();
             while (rs.next()) {
